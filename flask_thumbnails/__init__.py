@@ -1,5 +1,6 @@
 import os
 import errno
+import wand
 try:
     from PIL import Image, ImageOps
 except ImportError:
@@ -40,14 +41,17 @@ class Thumbnail(object):
         :param quality: JPEG quality 1-100
         :return: :thumb_url:
         """
-        width, height = [int(x) for x in size.split('x')]
+        width, height      = [int(x) for x in size.split('x')]
         url_path, img_name = os.path.split(img_url)
-        name, fm = os.path.splitext(img_name)
+        name, fm           = os.path.splitext(img_name)
 
-        miniature = self._get_name(name, fm, size, crop, bg, quality)
+        if fm == 'pdf':
+            miniature = self._get_name(name, 'jpg', size, crop, bg, quality)
+        else:
+            miniature = self._get_name(name, fm, size, crop, bg, quality)
 
-        original_filename = os.path.join(self.app.config['MEDIA_FOLDER'], url_path, img_name)
-        thumb_filename = os.path.join(self.app.config['MEDIA_THUMBNAIL_FOLDER'], url_path, miniature)
+        original_filename  = os.path.join(self.app.config['MEDIA_FOLDER'], url_path, img_name)
+        thumb_filename     = os.path.join(self.app.config['MEDIA_THUMBNAIL_FOLDER'], url_path, miniature)
 
         # create folders
         self._get_path(thumb_filename)
@@ -58,22 +62,27 @@ class Thumbnail(object):
             return thumb_url
 
         elif not os.path.exists(thumb_filename):
-            thumb_size = (width, height)
-            try:
-                image = Image.open(original_filename)
-            except IOError:
-                return None
+            if fm == 'pdf':
+                with Wand.Image(filename = original_filename + '[0]') as img:
+                    img.liquid_rescale(width, height)
+                    img.save(filename = thumb_filename)
+            else :
+                thumb_size = (width, height)
+                try:
+                    image = Image.open(original_filename)
+                except IOError:
+                    return None
 
-            if crop == 'fit':
-                img = ImageOps.fit(image, thumb_size, Image.ANTIALIAS)
-            else:
-                img = image.copy()
-                img.thumbnail((width, height), Image.ANTIALIAS)
+                if crop == 'fit':
+                    img = ImageOps.fit(image, thumb_size, Image.ANTIALIAS)
+                else:
+                    img = image.copy()
+                    img.thumbnail((width, height), Image.ANTIALIAS)
 
-            if bg:
-                img = self._bg_square(img, bg)
+                if bg:
+                    img = self._bg_square(img, bg)
 
-            img.save(thumb_filename, image.format, quality=quality)
+                img.save(thumb_filename, image.format, quality=quality)
 
             return thumb_url
 
