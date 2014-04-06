@@ -1,13 +1,10 @@
+from flask_thumbnails.image import Image
+
 import os
 import errno
-import wand
-try:
-    from PIL import Image, ImageOps
-except ImportError:
-    raise RuntimeError('Image module of PIL needs to be installed')
-
 
 class Thumbnail(object):
+
     def __init__(self, app=None):
         if app is not None:
             self.app = app
@@ -18,83 +15,83 @@ class Thumbnail(object):
     def init_app(self, app):
         self.app = app
 
+        # Set defautl settings and enforce MEDIA_FOLDER
         if not self.app.config.get('MEDIA_FOLDER', None):
             raise RuntimeError('You\'re using the flask-thumbnail app '
-                               'without having set the required MEDIA_FOLDER setting.')
+                               'without having set the required MEDIA_FOLDER '
+                               'setting.')
 
-        if self.app.config.get('MEDIA_THUMBNAIL_FOLDER', None) and not self.app.config.get('MEDIA_THUMBNAIL_URL', None):
-            raise RuntimeError('You\'re set MEDIA_THUMBNAIL_FOLDER setting, need set and MEDIA_THUMBNAIL_URL setting.')
+        if (self.app.config.get('MEDIA_THUMBNAIL_FOLDER', None) and
+            not self.app.config.get('MEDIA_THUMBNAIL_URL', None)):
+            raise RuntimeError('You\'re set MEDIA_THUMBNAIL_FOLDER setting, '
+                               'need set and MEDIA_THUMBNAIL_URL setting.')
 
-        app.config.setdefault('MEDIA_THUMBNAIL_FOLDER', os.path.join(self.app.config['MEDIA_FOLDER'], ''))
+        app.config.setdefault('MEDIA_THUMBNAIL_FOLDER',
+                               os.path.join(self.app.config['MEDIA_FOLDER'],
+                                            ''))
+
         app.config.setdefault('MEDIA_URL', '/')
-        app.config.setdefault('MEDIA_THUMBNAIL_URL', os.path.join(self.app.config['MEDIA_URL'], ''))
+        app.config.setdefault('MEDIA_THUMBNAIL_URL',
+                               os.path.join(self.app.config['MEDIA_URL'],
+                                            ''))
+        app.config.setdefault('THUMBNAIL_DEFAULT_EXTENSION', 'png')
+        app.config.setdefault('THUMBNAIL_ALLOWED_EXTENSIONS', ('png', 'gif',
+                                                               'jpg', 'jpeg',
+                                                               'webp'))
 
         app.jinja_env.filters['thumbnail'] = self.thumbnail
 
-    def thumbnail(self, img_url, size, crop=None, bg=None, quality=85):
+    def thumbnail(self, file_url, size, crop=None, quality=75, extension=None,
+                  page=0):
         """
-
-        :param img_url: url img - '/assets/media/summer.jpg'
+        :param file_url: url img - '/assets/media/summer.jpg'
         :param size: size return thumb - '100x100'
-        :param crop: crop return thumb - 'fit' or None
-        :param bg: tuple color or None - (255, 255, 255, 0)
+        :param crop: crop return thumb - 'fit', 'content-aware' or None
+        :param page: page to use to generate the thumbnail of PDF file
         :param quality: JPEG quality 1-100
         :return: :thumb_url:
         """
-        width, height      = [int(x) for x in size.split('x')]
-        url_path, img_name = os.path.split(img_url)
-        name, fm           = os.path.splitext(img_name)
+        thumbnail_size = [int(x) for x in size.split('x')]
 
-        if fm == 'pdf':
-            miniature = self._get_name(name, 'jpg', size, crop, bg, quality)
-        else:
-            miniature = self._get_name(name, fm, size, crop, bg, quality)
+        url_path, basename = os.path.split(file_url)
+        file_extension = os.path.splitext(basename)[1].strip('.')
 
-        original_filename  = os.path.join(self.app.config['MEDIA_FOLDER'], url_path, img_name)
-        thumb_filename     = os.path.join(self.app.config['MEDIA_THUMBNAIL_FOLDER'], url_path, miniature)
+        if not extension:
+            extension = file_extension
 
-        # create folders
-        self._get_path(thumb_filename)
+        if extension not in self.app.config['THUMBNAIL_ALLOWED_EXTENSIONS']:
+            print extension
+            extension = self.app.config['THUMBNAIL_DEFAULT_EXTENSION']
 
-        thumb_url = os.path.join(self.app.config['MEDIA_THUMBNAIL_URL'], url_path, miniature)
+        thumbnail_name = self.get_name(basename, extension, size, crop,
+                                       quality, page)
+        original_filename = os.path.join(self.app.config['MEDIA_FOLDER'],
+                                         url_path, basename)
+        thumbnail_filename = os.path.join(self.app.config['MEDIA_THUMBNAIL_FOLDER'],
+                                          url_path, thumbnail_name)
+        thumbnail_url = os.path.join(self.app.config['MEDIA_THUMBNAIL_URL'],
+                                    url_path, thumbnail_name)
 
-        if os.path.exists(thumb_filename):
-            return thumb_url
-
-        elif not os.path.exists(thumb_filename):
-            if fm == 'pdf':
-                with Wand.Image(filename = original_filename + '[0]') as img:
-                    img.liquid_rescale(width, height)
-                    img.save(filename = thumb_filename)
-            else :
-                thumb_size = (width, height)
-                try:
-                    image = Image.open(original_filename)
-                except IOError:
-                    return None
+        if not os.path.exists(thumbnail_filename):
+            self.make_path(thumbnail_filename)
+            filename = '{filename}[{page!s}]'.format(filename=original_filename,
+                                                     page=page)
+            with Image(filename=filename) as img:
+                img.compression_quality = quality
 
                 if crop == 'fit':
-                    img = ImageOps.fit(image, thumb_size, Image.ANTIALIAS)
+                    img.fit(thumbnail_size)
+                elif crop == 'content-aware':
+                    img.liquid_rescale(thumbnail_size[0], thumbnail_size[1])
                 else:
-                    img = image.copy()
-                    img.thumbnail((width, height), Image.ANTIALIAS)
+                    img.crop(right=thumbnail_size[0], bottom=thumbnail_size[1])
 
-                if bg:
-                    img = self._bg_square(img, bg)
+                img.save(filename=thumbnail_filename)
 
-                img.save(thumb_filename, image.format, quality=quality)
-
-            return thumb_url
+        return thumbnail_url
 
     @staticmethod
-    def _bg_square(img, color=0xff):
-        size = (max(img.size),) * 2
-        layer = Image.new('L', size, color)
-        layer.paste(img, tuple(map(lambda x: (x[0] - x[1]) / 2, zip(size, img.size))))
-        return layer
-
-    @staticmethod
-    def _get_path(full_path):
+    def make_path(full_path):
         directory = os.path.dirname(full_path)
 
         try:
@@ -105,10 +102,9 @@ class Thumbnail(object):
                 raise
 
     @staticmethod
-    def _get_name(name, fm, *args):
-        for v in args:
-            if v:
-                name += '_%s' % v
-        name += fm
+    def get_name(basename, extension, *args):
+        args = [str(arg) for arg in args if arg]
 
-        return name
+        return '{name}-{unique}.{extension}'.format(name=basename,
+                                                    unique='-'.join(args),
+                                                    extension=extension)
