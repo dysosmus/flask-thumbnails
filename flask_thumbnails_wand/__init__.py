@@ -1,4 +1,4 @@
-from flask_thumbnails.image import Image
+from flask_thumbnails_wand.image import Image
 
 import os
 import errno
@@ -15,9 +15,8 @@ class Thumbnail(object):
     def init_app(self, app):
         self.app = app
 
-        # Set defautl settings and enforce MEDIA_FOLDER
         if not self.app.config.get('MEDIA_FOLDER', None):
-            raise RuntimeError('You\'re using the flask-thumbnail app '
+            raise RuntimeError('You\'re using flask-thumbnail-wand '
                                'without having set the required MEDIA_FOLDER '
                                'setting.')
 
@@ -38,6 +37,7 @@ class Thumbnail(object):
         app.config.setdefault('THUMBNAIL_ALLOWED_EXTENSIONS', ('png', 'gif',
                                                                'jpg', 'jpeg',
                                                                'webp'))
+        app.config.setdefault('THUMBNAIL_FORCE_DEFAULT_EXTENSION', False)
 
         app.jinja_env.filters['thumbnail'] = self.thumbnail
 
@@ -59,8 +59,7 @@ class Thumbnail(object):
         if not extension:
             extension = file_extension
 
-        if extension not in self.app.config['THUMBNAIL_ALLOWED_EXTENSIONS']:
-            print extension
+        if not self.extension_is_allowed(extension):
             extension = self.app.config['THUMBNAIL_DEFAULT_EXTENSION']
 
         thumbnail_name = self.get_name(basename, extension, size, crop,
@@ -89,6 +88,15 @@ class Thumbnail(object):
                 img.save(filename=thumbnail_filename)
 
         return thumbnail_url
+
+    def extension_is_allowed(self, extension):
+        if self.app.config['THUMBNAIL_FORCE_DEFAULT_EXTENSION'] == True:
+            return self.app.config['THUMBNAIL_DEFAULT_EXTENSION'] == extension
+
+        if self.app.config['THUMBNAIL_ALLOWED_EXTENSIONS'] == True:
+            return True
+
+        return extension in self.app.config['THUMBNAIL_ALLOWED_EXTENSIONS']
 
     @staticmethod
     def make_path(full_path):
