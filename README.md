@@ -1,13 +1,13 @@
 Flask-thumbnails-wand
 ===============
 
-Flask extension to create thumbnails, based on Wand (ImageMagick).
+Flask extension to create thumbnails, based on Wand (ImageMagick).<br />
 This is a fork of [Flask-thumbnails](https://github.com/SilentSokolov/flask-thumbnails).
 
 Support
 =======
 
-* Python 2.7 and 3
+* Python 2.7 and 3.4
 * All files suported by ImageMagick (jpg, png, gif, pdf...)
 
 Installation
@@ -19,7 +19,7 @@ Run ``pip install git+https://github.com/dysosmus/flask-thumbnails-wand.git``
 
 Add ``Thumbnail`` to your extension file:
 
-    from flask.ext.thumbnails import Thumbnail
+    from flask.ext.thumbnails_wand import Thumbnail
 
     app = Flask(__name__)
 
@@ -30,7 +30,7 @@ Add ``MEDIA_FOLDER`` and ``MEDIA_URL`` in your settings:
     app.config['MEDIA_FOLDER'] = '/home/www/media'
     app.config['MEDIA_URL'] = '/media/'
 
-### notes
+### Notes
 If you want to use the content aware crop method, you need to install ImageMagick with the Liquid Rescale support.
 
 Usage
