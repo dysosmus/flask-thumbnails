@@ -1,6 +1,7 @@
-0.2 (2012-11-15)
-    - Fixed problem in develop server
-    - Add first test
-
-0.1 (2013-04-23)
-    Initial release.
+0.1 (2014-04-07)
+    - fork form https://github.com/SilentSokolov/flask-thumbnails
+    - replace PIL by Wand (ImageMagick)
+    - add support of PDF file
+    - add content aware crop method (http://en.wikipedia.org/wiki/Seam_carving)
+    - add option to force the thumbnail format
+    - drop support of bg option

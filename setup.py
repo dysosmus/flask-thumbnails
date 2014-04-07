@@ -1,19 +1,19 @@
 from distutils.core import setup
 
 setup(
-    name='Flask-thumbnails',
-    version='0.2',
-    url='https://github.com/SilentSokolov/flask-thumbnails',
+    name='Flask-thumbnails-wand',
+    version='0.1',
+    url='https://github.com/dysosmus/flask-thumbnails-wand',
     license='MIT',
-    author='Dmitriy Sokolov',
-    author_email='silentsokolov@gmail.com',
-    description='A simple extension to create a thumbs for the Flask',
-    packages=['flask_thumbnails'],
+    author='Félix Mattrat, Dmitriy Sokolov',
+    author_email='hello+flask-thumbnails-wand@dysosmus.net',
+    description='A simple extension to create thumbnails for Flask, based on Wand',
+    packages=['flask_thumbnails_wand'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask',
-        'Pillow==2.2.1',
+        'Flask>=0.10',
+        'Wand>=0.3',
     ],
 )
