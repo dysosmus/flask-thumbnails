@@ -105,8 +105,8 @@ class Thumbnail(object):
         try:
             if not os.path.exists(full_path):
                 os.makedirs(directory)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
+        except OSError as error:
+            if error.errno != errno.EEXIST:
                 raise
 
     @staticmethod

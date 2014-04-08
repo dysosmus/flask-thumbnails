@@ -42,12 +42,12 @@ class ThumbnailTestCase(unittest.TestCase):
             Test if the result of Thumbnail.get_name return a constant result
             for the given args.
         """
-        values = ( (('image.jpg', 'jpg', '200x200', 'fit', 100), 'image.jpg-200x200-fit-100.jpg'),
+        values = ((('image.jpg', 'jpg', '200x200', 'fit', 100), 'image.jpg-200x200-fit-100.jpg'),
                    (('image.jpg', 'jpg', '200x200', 'fit', '100'), 'image.jpg-200x200-fit-100.jpg'),
                    (('image.jpg', 'jpg', '200x200'), 'image.jpg-200x200.jpg'),
                    (('image.png', 'jpg', '200x200'), 'image.png-200x200.jpg'),
                    (('image.pdf', 'png', '200x200'), 'image.pdf-200x200.png'),
-                   (('image', 'png', '200x200'), 'image-200x200.png'), )
+                   (('image', 'png', '200x200'), 'image-200x200.png'),)
 
         for args, excepted in values:
             name = self.thumbnail.get_name(*args)
@@ -122,4 +122,4 @@ class ThumbnailTestCase(unittest.TestCase):
             self.assertFalse(self.thumbnail.extension_is_allowed(extension))
 
     def tearDown(self):
-        rmtree(self.tempdir, ignore_errors = True)
+        rmtree(self.tempdir, ignore_errors=True)

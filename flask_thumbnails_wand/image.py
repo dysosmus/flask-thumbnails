@@ -32,12 +32,12 @@ class Image(wand.image.Image):
 
         if centering[0] > 1.0 or centering[0] < 0.0: centering = 0.5
         if centering[1] > 1.0 or centering[1] < 0.0: centering = 0.5
-        if bleed > 0.49999    or bleed < 0.0:        bleed     = 0.0
+        if bleed > 0.49999 or bleed < 0.0: bleed = 0.0
 
         trimed_pixels = (int(float(bleed) * float(self.size[0]) + 0.5),
                          int(float(bleed) * float(self.size[1]) + 0.5))
 
-        live_area     = (0, 0, self.size[0], self.size[1])
+        live_area = (0, 0, self.size[0], self.size[1])
 
         if bleed > 0.5:
             live_area = (trimed_pixels[0], trimed_pixels[1],
@@ -47,23 +47,23 @@ class Image(wand.image.Image):
         live_size = (live_area[2] - live_area[0], live_area[3] - live_area[1])
         live_area_aspect_ratio = float(live_size[0]) / float(live_size[1])
 
-        aspect_ratio =  float(size[0]) / float(size[1])
+        aspect_ratio = float(size[0]) / float(size[1])
 
         if live_area_aspect_ratio >= aspect_ratio:
-            crop_width  = aspect_ratio * float(live_size[1]) + 0.5
+            crop_width = aspect_ratio * float(live_size[1]) + 0.5
             crop_height = live_size[1]
         else:
-            crop_width  = live_size[0]
+            crop_width = live_size[0]
             crop_height = float(live_size[0]) / aspect_ratio + 0.5
 
-        crop_width  = int(crop_width)
+        crop_width = int(crop_width)
         crop_height = int(crop_height)
 
         left_side = live_area[0] + float(live_size[0] - crop_width)  * centering[0]
-        top_side  = live_area[1] + float(live_size[1] - crop_height) * centering[1]
+        top_side = live_area[1] + float(live_size[1] - crop_height) * centering[1]
 
         left_side = 0 if left_side < 0 else int(left_side)
-        top_side  = 0 if top_side  < 0 else int(top_side)
+        top_side = 0 if top_side < 0 else int(top_side)
 
         self.crop(left_side, top_side, width=crop_width, height=crop_height)
         self.resize(size[0], size[1])
