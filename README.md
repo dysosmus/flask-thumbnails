@@ -1,7 +1,7 @@
 Flask-thumbnails-wand
 ===============
 
-[![Build Status](https://travis-ci.org/dysosmus/flask-thumbnails-wand.svg?branch=development)](https://travis-ci.org/dysosmus/flask-thumbnails-wand)
+[![Build Status](https://travis-ci.org/dysosmus/flask-thumbnails-wand.svg?branch=master)](https://travis-ci.org/dysosmus/flask-thumbnails-wand)
 
 Flask extension to create thumbnails, based on Wand (ImageMagick).<br />
 This is a fork of [Flask-thumbnails](https://github.com/SilentSokolov/flask-thumbnails).
