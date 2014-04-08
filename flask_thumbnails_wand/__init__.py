@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask_thumbnails_wand.image import Image
 
 import os
