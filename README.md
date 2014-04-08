@@ -7,7 +7,7 @@ This is a fork of [Flask-thumbnails](https://github.com/SilentSokolov/flask-thum
 Support
 =======
 
-* Python 2.7 and 3.4
+* Python 2.6, 2.7 and 3.4
 * All files suported by ImageMagick (jpg, png, gif, pdf...)
 
 Installation
@@ -45,10 +45,10 @@ Use in Jinja2 template:
 
 ### Options
 
-``crop``  
+``crop``
 
 * ``fit`` returns a sized and cropped version of the image, cropped to the requested aspect ratio and size, this method respect the implemention of  [PIL.ImageOps.fit](http://pillow.readthedocs.org/en/latest/reference/ImageOps.html#PIL.ImageOps.fit).
-* ``content-aware``. 
+* ``content-aware``.
 
 ``quality`` changes the quality of the output JPEG thumbnail, default ``75``.
 
@@ -72,7 +72,7 @@ If you want to store the thumbnail in a folder other than the ``MEDIA_FOLDER``, 
 The default configuration allow only ``png``, ``gif``, ``jpg``, ``jpeg`` or ``webp`` as output formats for thumbnail:
 
 	app.config['THUMBNAIL_ALLOWED_EXTENSIONS'] = ('png', 'webp') # allow only png and webp
-	
+
 	app.config['THUMBNAIL_ALLOWED_EXTENSIONS'] = True # don't check the output format
 
 
