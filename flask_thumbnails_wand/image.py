@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import wand.image
 
 class Image(wand.image.Image):
