@@ -9,7 +9,7 @@ This is a fork of [Flask-thumbnails](https://github.com/SilentSokolov/flask-thum
 Support
 =======
 
-* Python 2.6, 2.7 and 3.4
+* Python 2.6, 2.7
 * All files suported by ImageMagick (jpg, png, gif, pdf...)
 
 Installation
